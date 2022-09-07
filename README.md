@@ -6,3 +6,4 @@ I will try to use OpenPIV http://www.openpiv.net/ to estimate and subtract remov
 https://github.com/OpenPIV/openpiv-python
 conda install -c conda-forge openpiv
 
+conda create -n scwaves jupyterlab openpiv
