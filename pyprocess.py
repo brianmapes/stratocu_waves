@@ -452,7 +452,7 @@ def sig2noise_ratio(correlation, sig2noise_method="peak2peak", width=2):
 
     The signal to noise ratio is computed from the correlation map with
     one of two available method. It is a measure of the quality of the
-    matching between to interrogation windows.
+    matching between two interrogation windows.
 
     Parameters
     ----------
@@ -851,7 +851,7 @@ def fft_correlate_windows(window_a, window_b,
     corr = irfft2(f2a * f2b).real[fslice]
     return corr
 
-
+# HERE IS THE MAIN CODE (BEM)
 def extended_search_area_piv(
     frame_a,
     frame_b,
@@ -992,7 +992,7 @@ def extended_search_area_piv(
     # for the case of extended seearch, the window size is smaller than
     # the search_area_size. In order to keep it all vectorized the
     # approach is to use the interrogation window in both
-    # frames of the same size of search_area_asize,
+    # frames of the same size of search_area_size,
     # but mask out the region around
     # the interrogation window in the frame A
 
