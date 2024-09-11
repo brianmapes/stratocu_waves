@@ -19,7 +19,6 @@ figure(1)
 imshow(frame50); colorbar;
 
 
-
 %%% Wavelet transform 
 
 % a set of 7 Angles from 0 to pi (N, NNW, WNW, W, WSW, SSW, )
