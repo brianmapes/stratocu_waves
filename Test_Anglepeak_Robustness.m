@@ -1,22 +1,23 @@
 % Import video 
 %v = VideoReader("DATA/Baja_202307051401-202307052331_g18_conus_band2_vonkarmans-waves_nolabels.mp4");
-v = VideoReader("DATA/syn_scwave_warp_modx5.mp4");
-
-video = read(v);
-
-% red channel brightness only 
-red = squeeze( video(:,:,1,:) );
-% size(red) 1080, 1920, 115
-
-%%% SELECT ONE FRAME FOR SPATIAL ANALYSIS
-% First argument is y increasing downward, second is x from left
+%red = squeeze( video(:,:,1,:) );
+%size(red)  % 1080, 1920, 115
 % frame50=red(:,:,50); % for vonkarmans case
-frame50=red(100:700,150:880,3); % for synthetic case
+
+% v = VideoReader("DATA/syn_scwave_warp_modx5.mp4");
+%v = VideoReader("DATA/closedcellday_2022_09_06.mp4");
+%video = read(v);
+%red = squeeze( video(:,:,1,:) ); % red channel brightness only 
+%frame50=red(100:700,150:880,3); % for synthetic case
+
+v = VideoReader("DATA/closedcellday_2022_09_06.mp4");
+video = read(v);
+red = squeeze( video(:,:,1,:) ); % red channel brightness only 
+frame50 = red(1:1000,600:1450,3); % for real data image
 
 % QUICK SHOW 
 figure(1)
 imshow(frame50); colorbar;
-
 
 %%% Wavelet transform 
 
@@ -37,32 +38,40 @@ spec = squeeze( cwtCauchy.cfs );
 % mean() averages over the first dimension, so two of those will make
 
 power = abs(spec) .^2;
-innerpower = squeeze(  mean(mean( power(100:500,100:600, :,:) ))  );
+
+% for synthetic data (has axes in image area, must clip them) 
+% innerpower = squeeze(  mean(mean( power(100:500,100:600, :,:) ))  );
+
+% for actual data (avoid edge effects --> some "inner" box)
+innerpower = squeeze(  mean(mean( power(50:800,200:800, :,:) ))  );
 
 
 % There's a mean increase of power with scale, normalize it away
 figure(2)
 meanbyscale = squeeze( mean(transpose(innerpower)) );
-plot(Scales, meanbyscale); title('mean power by scale')
+plot(Scales, meanbyscale); title('mean power by scale'); xlabel('scale (pixels)')
 
 % Normalize by that mean increase with scale, call it anglespec:
 anglespec = innerpower .* 0;     % right sized container for angle spectrum
-for isc = 1:20   %size( transpose(Scales) )
+for isc = 1:24   %size( transpose(Scales) )
     anglespec(:,isc) = squeeze(innerpower(:,isc)) ./ transpose(meanbyscale);
 end 
 
 % The angle spectrum 
 figure(3)
 pcolor(anglespec); colorbar(); 
+xlabel('Angle index'); ylabel('Scale index')
+title('areameanpower/meanbyscale')
+hold off 
+
+figure(4)
+pcolor(Angles*180/pi, Scales, anglespec); colorbar(); 
+xlabel('Angle (deg)'); ylabel('Scale (pixels, roughly)')
 title('areameanpower/meanbyscale')
 hold off 
 
 
 figure(7)
-image_with_wavelet_overlay(frame50, spec, Scales, 8,7); title('scale 8 angle 7')
+image_with_wavelet_overlay(frame50, spec, Scales, 9,8); title('scale 9 angle 8')
 figure(8)
-image_with_wavelet_overlay(frame50, spec, Scales, 8,8); title('scale 8 angle 8')
-figure(9)
-image_with_wavelet_overlay(frame50, spec, Scales, 8,9); title('scale 8 angle 9')
-figure(10)
-image_with_wavelet_overlay(frame50, spec, Scales, 8,10); title('scale 8 angle 10')
+image_with_wavelet_overlay(frame50, spec, Scales, 15,14); title('scale 15 angle 14')
