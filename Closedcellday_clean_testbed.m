@@ -99,28 +99,28 @@ figure(2)
 meanbyscale = squeeze( mean(transpose(innerpower)) );
 plot(Scales, meanbyscale); title('mean power by scale'); xlabel('scale (pixels)')
 
-% Normalize by that mean increase with scale, call it anglespec:
-anglespec = innerpower .* 0;     % right sized container for angle spectrum
+% Normalize by that mean increase with scale, call it scaleanglespec:
+scaleanglespec = innerpower .* 0;     % right sized container for angle spectrum
 for isc = 1:NSCALES
-    anglespec(:,isc) = squeeze(innerpower(:,isc)) ./ transpose(meanbyscale);
+    scaleanglespec(:,isc) = squeeze(innerpower(:,isc)) ./ transpose(meanbyscale);
 end 
 
 % The angle spectrum: let's have a quick look in index space 
 figure(3)
-imagesc(anglespec); colorbar(); 
+imagesc(scaleanglespec); colorbar(); 
 xlabel('Angle index'); ylabel('Scale index')
 title('areameanpower/meanbyscale')
 
 % Labeled: this should be a polar plot, using angle as the azimuth 
 figure(4)
-pcolor(Angles*180/pi, Scales, anglespec); colorbar(); 
+pcolor(Angles*180/pi, Scales, scaleanglespec); colorbar(); 
 xlabel('Angle (deg)'); ylabel('Scale (pixels, roughly)')
 title('areameanpower/meanbyscale (learn to do polar plot)')
 
 
 
-% Grab the peaks where anglespec exceeds a threshold strength
-[row,col] = find( imregionalmax(anglespec) & anglespec>1 )
+% Grab the peaks where scaleanglespec exceeds a threshold strength
+[row,col] = find( imregionalmax(scaleanglespec) & scaleanglespec>1 )
 
 % illustrate them with calls to image_with_wavelet_overlay()
 for ipeak = 1:size(row)
