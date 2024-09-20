@@ -23,13 +23,13 @@ fy = 1:size(fframe,1);
 fx = 1:size(fframe,2);
 
 % resize images (arrays) to make computations faster  
-% scalefactor=1;
-scalefactor=5; invscalefactor = 0.2;
-frame = imresize(fframe , invscalefactor);
-frame2= imresize(fframe2, invscalefactor);
+% shrinkfactor=1;
+shrinkfactor=5; invshrinkfactor = 0.2;
+frame = imresize(fframe , invshrinkfactor);
+frame2= imresize(fframe2, invshrinkfactor);
 % coordinate arrays at low resolution
-y = (1:size(frame,1) ) *scalefactor;
-x = (1:size(frame,2) ) *scalefactor;
+y = (1:size(frame,1) ) *shrinkfactor;
+x = (1:size(frame,2) ) *shrinkfactor;
 
 
 % QUICK SHOW 
@@ -44,9 +44,9 @@ title('Frame 1, and contours of Frame2-Frame1')
 NSCALES = 24;
 Angles = 0:pi/NSCALES:pi ;
 
-% a LOGARITHMIC set of 10 Scales, scalefactor resizes them
+% a LOGARITHMIC set of 10 Scales, shrinkfactor resizes them
 Scales = 10.^(1:.05:1.9);
-Scales = Scales/scalefactor; 
+Scales = Scales/shrinkfactor; 
 
 
 %%% Call wavelet spectrum 
@@ -85,14 +85,10 @@ xspec  = spec2 .* conj(spec);
 % for actual closedcell movie data some "inner" box 
 % specify it according to array size, max(Scales) away from edges 
 
-innerpower = squeeze(  mean(mean( power(50:800,200:800, :,:) ))  );
+buffer = round( max(Scales) );
 
-
-% Average the complex cross-coherence over spatial area, and extract
-% coh,angle from the averaged complex array 
-innerxspec = squeeze(  mean(mean( xspec(50:800,200:800, :,:) ))  );
-inner_coh2 = abs(innerxspec).^2;
-inner_angl = angle(innerxspec);
+innerpower = squeeze( mean(mean( power(buffer:size(power,1)-buffer, ...
+                                       buffer:size(power,2)-buffer, :,:) )));
 
 
 % There's a mean increase of power with scale, divide by it 
@@ -120,7 +116,32 @@ xlabel('Angle (deg)'); ylabel('Scale (pixels, roughly)')
 title('areameanpower/meanbyscale (learn to do polar plot)')
 
 
+% Grab the peaks where anglespec exceeds a threshold strength, and
+% illustrate them with a call to image_with_wavelet_overlay
+[row,col] = find( imregionalmax(anglespec) & anglespec>1 )
+for ipeak = 1:size(row)
+    figure(10+ipeak);
+    isc = row(ipeak); ian = col(ipeak);
+    contours = 2; 
+    image_with_wavelet_overlay(frame, spec, Scales, isc,ian, contours); 
+    title('scale, angle: '+string( Scales(isc))+' pixels, ' ...
+          +string(Angles(ian)*180./pi)+'deg');
+end
+
+
+
 % The coherence-squared and angle spectra 
+innerxspec = squeeze( mean(mean( xspec(buffer:size(xspec,1)-buffer, ...
+                                       buffer:size(xspec,2)-buffer, :,:) )));
+xpowr = abs( xspec.*conj(spec2) );
+inner_coh2 = squeeze( mean(mean( xpowr(buffer:size(xspec,1)-buffer, ...
+                                       buffer:size(xspec,2)-buffer, :,:) )))/innerpower;
+
+% Average the complex cross-coherence over spatial area, and extract
+% coh,angle from the averaged complex array 
+inner_angl = angle(innerxspec);
+
+
 figure(5)
 pcolor(inner_coh2); colorbar(); 
 xlabel('Angle index'); ylabel('Scale index')
