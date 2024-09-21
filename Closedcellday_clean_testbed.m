@@ -107,22 +107,46 @@ figure(2)
 meanbyscale = squeeze( mean(transpose(innerpower)) );
 plot(Scales, meanbyscale); title('mean power by scale'); xlabel('scale (pixels)')
 
-% Normalize by that mean increase with scale, call it scaleanglespec:
-scaleanglespec = innerpower .* 0;     % right sized container for angle spectrum
-for isc = 1:NSCALES
-    scaleanglespec(:,isc) = squeeze(innerpower(:,isc)) ./ transpose(meanbyscale);
+% At each angle, normalize by that angle-mean increase with scale, 
+% call the result scaleanglespec:
+
+scaleanglespec = innerpower .* 0;     % right sized container for scl-ang 
+scaleanglespec2 = innerpower .* 0;    % right sized container again
+for iangle = 1:NANGLES
+    scaleanglespec(:,iangle) =  squeeze(innerpower (:,iangle)) ./ transpose(meanbyscale);
+    scaleanglespec2(:,iangle) = squeeze(innerpower2(:,iangle)) ./ transpose(meanbyscale);
 end 
 
-% The angle spectrum: let's have a quick look in index space 
+% Make coherence-squared and angle spectra from spec .* conj(spec2)
+% Everything is an inner area mean (far from boundaries) 
+% If spec = R1 + iQ1 with Q meaning quadrature,
+% xspec = spec .* conj(spec2) = (R1*R2)+(Q1*Q2) + i (R1Q2+R2Q1)
+
+% coh2 is its magnitude (normalized by abs(spec) and abs(spec2))
+inner_coh2 = abs(innerxspec) ./ sqrt(innerpower) ./ sqrt(innerpower2);
+
+% inner_angle is atan(imag/real)  
+inner_angle = angle(innerxspec);
+
+
+
+% The angle spectrum: let's have a quick look, first in index space 
 figure(3)
-subplot(121)
-imagesc(scaleanglespec); colorbar(); 
+subplot(131)
+pcolor(scaleanglespec); colorbar(); 
 xlabel('Angle index'); ylabel('Scale index')
 title('areameanpower/meanbyscale')
 
-% Labeled: this should be a polar plot, using angle as the azimuth 
-subplot(122)
-pcolor(Angles*180/pi, Scales, scaleanglespec); colorbar(); 
+% Labeled space: this should be a polar plot, using angle as the azimuth 
+subplot(132)
+pcolor(Angles*180/pi, Scales, scaleanglespec); colorbar(); hold on 
+contour(Angles*180/pi, Scales, scaleanglespec2, 'black')
+xlabel('Angle (deg)'); ylabel('Scale (pixels, roughly)')
+title('areameanpower/meanbyscale (learn to do polar plot)')
+
+% coh2 overlaid by power2
+subplot(133)
+pcolor(Angles*180/pi, Scales, inner_coh2); colorbar()
 xlabel('Angle (deg)'); ylabel('Scale (pixels, roughly)')
 title('areameanpower/meanbyscale (learn to do polar plot)')
 
@@ -162,31 +186,20 @@ for ipeak = 1:size(row,1)
 end
 
 
-% Make coherence-squared and angle spectra from spec .* conj(spec2)
-% If spec = R1 + iQ1 with Q meaning quadrature,
-% xspec = spec .* conj(spec2) = (R1*R2)+(Q1*Q2) + i (R1Q2+R2Q1)
 
-%xpowr = abs(xspec);
-%power  = abs(spec) .^2;
-%power2 = abs(spec2).^2;
-% innerxspec was computed above, with scale-dependent "inner"
-
-% coh2 is its magnitude (normalized by abs(spec) and abs(spec2))
-inner_coh2 = abs(innerxspec) ./ sqrt(innerpower) ./ sqrt(innerpower2);
-
-% inner_angle is atan(imag/real)  
-inner_angl = angle(innerxspec);
-
-
+% Coherence squared is in [0,1]
 figure(5)
-imagesc(Angles*180/pi, Scales, inner_coh2); colorbar(); 
+pcolor(Angles*180/pi, Scales, inner_coh2); colorbar(); 
 xlabel('Angle (deg)'); ylabel('Scale (pixels, approx.)')
 title('Squared coherence between images')
 
+% Phase angle is in [-pi,pi], multiply by scale to get a speed 
 figure(6)
-pcolor(Angles*180/pi, Scales, inner_angl); colorbar(); hold on
-contour(Angles*180/pi, Scales, inner_coh2); colorbar(); 
+pcolor(Angles*180/pi, Scales, inner_angle*); colorbar(); hold on
+contour(Angles*180/pi, Scales, inner_coh2,'black', ...
+    LevelList=(1:80)/100.); 
+colorbar(); 
 xlabel('Angle (deg)'); ylabel('Scale (pixels, approx.)')
-title('Phase angle and coh2, averaged over Inner area')
+title('Phase angle masked by low coh2, averaged over Inner area')
 
 
