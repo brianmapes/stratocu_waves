@@ -1,12 +1,13 @@
 
-function output = image_with_wavelet_overlay(img,spec,x,y, Scales, scale, angle,clevfactor)
+function output = image_with_wavelet_overlay(img,spec,x,y, Scales, scale, angle,clev)
     % Overlay wavelet power on image 
     image(img); colormap(gray); colorbar; axis on
 
     hold on
 
-    posLevels = (1:2:9)   /clevfactor;
-    negLevels = (-9:2:-1) /clevfactor;
+    % clev is the contour level, an argument incoming 
+    posLevels = (1:2:9)   /10. * clev;
+    negLevels = (-9:2:-1) /10. * clev;
 
     % Adjust contour levels by Scale as factor (for real/imag), factor^2 (for power)
     sfactor = Scales(scale);
