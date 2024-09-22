@@ -1,7 +1,7 @@
 
 function output = image_with_wavelet_overlay(img,spec,x,y, Scales, scale, angle,clev)
     % Overlay wavelet power on image 
-    image(img); colormap(gray); colorbar; axis on
+    imagesc(img); colormap(gray); colorbar; axis on
 
     hold on
 
