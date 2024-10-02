@@ -81,15 +81,20 @@ power = squeeze( mean(powpow,3) );  % time average!
 % mean() averages over the first dimension, so two of those is spatial avg
 % specify "inner" to be the area a 1-Scale length buffer away from edges 
 
-innerpower = squeeze( mean(mean(power))) .*0; % RIGHT-SHAPE CONTAINER
+%innerpower  = squeeze( mean(mean(power ))) .*0; % RIGHT-SHAPED CONTAINER
+innerpowpow = squeeze( mean(mean(powpow))) .*0; % time dependent 
 
 % specify "inner" as 1-Scale length buffer from edges, SCALE BY SCALE
 for isc = 1:NSCALES
     buffer = round(Scales(isc)*3);  % for Scales too big, NaN problems appear
-    innerpower(isc,:) = squeeze( ...
-        mean(mean( power(buffer:size(power,1)-buffer, ...
-                         buffer:size(power,2)-buffer, isc,:) )));
+    for it = 1:size(fframes,3)
+        innerpowpow(it,isc,:) = squeeze( mean(mean( ...
+                  powpow(buffer:size(powpow,1)-buffer, ...
+                         buffer:size(powpow,2)-buffer, it,isc,:) )));
+    end
 end
+
+innerpower = squeeze(mean(innerpowpow,1)); % time mean 
 
 % There's a mean increase of power with scale, divide by it. 
 % Why is it there? Study later: is abs(spec) an amplitude in the 
@@ -106,19 +111,23 @@ xlabel('fScale (pixels in full-res image)')
 % At each angle, normalize by that angle-mean increase with scale, 
 % call the result scaleanglespec:
 
-scaleanglespec = innerpower .* 0;   % right sized container for scl-ang 
+scaleanglespect = innerpowpow .* 0;   % right sized container time-scl-ang 
 for iangle = 1:NANGLES
-    scaleanglespec(:,iangle) =  squeeze(innerpower (:,iangle)) ./ ...
-        transpose(meanbyscale);
+    for it = 1:size(fframes,3)
+        scaleanglespect(it,:,iangle) = ...
+            innerpowpow (it,:,iangle) ./ meanbyscale;
+    end
 end 
-
-
+scaleanglespec = squeeze(mean(scaleanglespect,1));   % time mean
 % The angle spectrum: let's have a quick look, first in index space 
 figure(4)
-pcolor(Angles*180/pi, fScales, scaleanglespec); colorbar(); hold on; 
-contour(Angles*180/pi, fScales, imregionalmax(scaleanglespec) & scaleanglespec>1)
-xlabel('Angle (deg)'); ylabel('Scale (pixels, roughly)')
-title('time-areameanpower/meanbyscale and its peaks')
+
+isosurface(scaleanglespect,1)
+
+%pcolor(Angles*180/pi, fScales, scaleanglespec); colorbar(); hold on; 
+%contour(Angles*180/pi, fScales, imregionalmax(scaleanglespec) & scaleanglespec>1)
+%xlabel('Angle (deg)'); ylabel('Scale (pixels, roughly)')
+%title('time-areameanpower/meanbyscale and its peaks')
 
 %%% For every peak in the spectrum averaged over whole image area, 
 %%% Let's locate an area where it is prominent, and set the contour 
