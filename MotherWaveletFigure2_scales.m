@@ -86,9 +86,9 @@ end
 hold off;
 
 % Customize the plot
-xlabel('Scale');  % Or your x-axis label
-ylabel('Projection');             % Or your y-axis label
-title('Cauchy Scale spectra of 5 monochromatic waves');
+xlabel('Scale S');  % Or your x-axis label
+ylabel('abs(spec) *2/S');             % Or your y-axis label
+title('Cauchy Scale spectra of unit monochromatic waves');
 
 % Set x-axis ticks and labels (optional)
 % xticks(1:size(data,1)); % Show ticks for each data point
