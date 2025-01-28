@@ -86,7 +86,7 @@ end
 hold off;
 
 % Customize the plot
-xlabel('Scale (~half wavelength)');  % Or your x-axis label
+xlabel('Scale');  % Or your x-axis label
 ylabel('Projection');             % Or your y-axis label
 title('Cauchy Scale spectra of 5 monochromatic waves');
 
@@ -102,4 +102,4 @@ legend({'128', '64', '32', '16', '8'}, 'Location', 'best'); % Customize labels
 %xlim([0 size(data,1)+1]); % Set axis limits to avoid cutting off bars
 %ylim([min(min(data)) max(max(data))]); % Set axis limits to avoid cutting off bars
 
-title('Cauchy Scales for monochromatic waves, by half-wavelength')
+title('Cauchy Scales spectrum for monochromatic waves, by half-wavelength')
